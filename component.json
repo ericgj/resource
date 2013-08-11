@@ -1,0 +1,17 @@
+{
+  "name": "resource",
+  "repo": "ericgj/resource",
+  "description": "Server-facing models",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {},
+  "development": {
+    "component/assert": "*",  
+    "ericgj/minispy": "*"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}
