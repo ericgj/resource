@@ -18,6 +18,7 @@ Resource.expose = function(meth){
   return this;
 }
 
+// TODO: implied name = 'self' if arguments.length < 2 ?
 Resource.read =
 Resource.list = function(name,fn){
   this.addCommand(this.links[name], 'get', fn);

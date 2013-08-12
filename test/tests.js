@@ -114,4 +114,21 @@ describe('Resource', function(){
     assert(spy.calledWith(newAuthor));
   })
 
+  it('should add to a collection', function(){
+    var subject = this.subject
+      , newComment = { id: '/comment/456', body: 'despite the rain' };
+    assert(this.subject.links.comments);
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.post = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.add('comments', newComment);
+    subject.commit();
+
+    assert(subject.links.comments == dummy.address);
+    assert(spy.calledOnce());
+    assert(spy.calledWith(newComment));
+  })
+
 })
