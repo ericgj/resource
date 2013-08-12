@@ -3,7 +3,10 @@ var assert = require('component-assert')
   , Spy = require('ericgj-minispy')
   , Resource = require('resource')
 
-// Set up test model
+// Set up test models
+
+function Post(data)   { this.data = data; return this; }
+function Comment(data){ this.data = data; return this; }
 
 function PostResource(message, service){
   if (!(this instanceof PostResource)) return new PostResource(message,service);
@@ -18,8 +21,23 @@ function PostResource(message, service){
   return this;
 }
 
-Resource(PostResource.prototype);
+function CastedPostResource(message, service){
+  if (!(this instanceof CastedPostResource)) return new CastedPostResource(message,service);
+  this.commands = [];
+  this.entities = {};
+  this.links = {};
+  this.setService(service);
+  this.entity('post', Post);
+  this.expose('author', function(obj){ return obj.id; });
+  this.collection('comments', Comment);
+  parse(message, this);
+  return this;
+}
 
+Resource(PostResource.prototype);
+Resource(CastedPostResource.prototype);
+
+CastedPostResource.prototype.setService = 
 PostResource.prototype.setService = function(service){
   this.service = service;
   return this;
@@ -88,7 +106,7 @@ fixtures.push( {
 describe('Resource', function(){
   beforeEach(function(){
     this.subject = new PostResource( fixtures[0] );    
-  });
+  })
 
   it('should expose specified entities', function(){
     var subject = this.subject;
@@ -96,8 +114,8 @@ describe('Resource', function(){
     assert('Karl Marx' ==  subject.author().name);
     assert(1 == subject.comments().length);
   })
-  
-  it('should update singular entity', function(){
+ 
+  it('should generate command to update singular entity', function(){
     var subject = this.subject
       , newAuthor = { id: '/user/456', name: 'Jules Verne' }
     assert(this.subject.links.author);
@@ -114,7 +132,7 @@ describe('Resource', function(){
     assert(spy.calledWith(newAuthor));
   })
 
-  it('should add to a collection', function(){
+  it('should generate command to add to a collection', function(){
     var subject = this.subject
       , newComment = { id: '/comment/456', body: 'despite the rain' };
     assert(this.subject.links.comments);
@@ -132,3 +150,27 @@ describe('Resource', function(){
   })
 
 })
+
+describe('Resource with casting', function(){
+  beforeEach(function(){
+    this.subject = new CastedPostResource( fixtures[0] );    
+  })
+
+  it('should expose entity constructed with given function', function(){
+    var subject = this.subject
+    assert(Post === subject.post().constructor);
+  })
+
+  it('should expose result of casting function', function(){
+    var subject = this.subject
+    assert('/user/123' == subject.author());
+  })
+
+  it('should expose collection of entities constructed with given function', function(){
+    var subject = this.subject
+    subject.comments().each(function(obj){
+      assert(Comment === obj.constructor);
+    })
+  })
+})
+

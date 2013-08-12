@@ -1,19 +1,32 @@
-var has = Object.hasOwnProperty;
+// var has = Object.hasOwnProperty;
+
+var Collection = require('collection')
 
 module.exports = Resource;
 
 function Resource(proto) {
   var self = Resource;
   for (k in self){
-    if (has.call(self,k)) proto[k] = self[k];
+    // if (has.call(self,k)) proto[k] = self[k];
+    proto[k] = self[k];
   }
 }
 
-// TODO: casting, e.g. this.expose('foo', function(f){ return new Foo(f)})
-//       and shortcuts, e.g. this.entity('foo', Foo);  this.collection('bar', Bar);
-Resource.expose = function(meth){
+Resource.entity = function(meth,klass){
+  return this.expose(meth, function(obj){ return new klass(obj); });
+}
+
+Resource.collection = function(meth,klass){
+  return this.expose(meth, function(arr){
+    return new Collection(arr).map(function(obj){ 
+      return new klass(obj); 
+    });
+  });
+}
+
+Resource.expose = function(meth, cast){
   this[meth] = function(){
-    return this.entities[meth];
+    return (cast ? cast(this.entities[meth]) : this.entities[meth]);
   }
   return this;
 }

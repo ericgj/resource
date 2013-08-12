@@ -2,9 +2,11 @@
   "name": "resource",
   "repo": "ericgj/resource",
   "description": "Server-facing models",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "component/collection": "*"  
+  },
   "development": {
     "component/assert": "*",  
     "ericgj/minispy": "*"
