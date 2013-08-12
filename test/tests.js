@@ -60,10 +60,12 @@ function parse(message, resource){
           for (var i=0;i<post.comments.length;++i){
             resource.entities.comments.push(post.comments[i]);
           }
+          break;
         case 'author':
           for (var p in post.author){
             resource.entities.author[p] = post.author[p];
           }
+          break;
         default:
           resource.entities.post[prop] = post[prop];
       }
