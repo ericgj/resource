@@ -1,13 +1,9 @@
-// var has = Object.hasOwnProperty;
-
-var Collection = require('collection')
 
 module.exports = Resource;
 
 function Resource(proto) {
   var self = Resource;
   for (k in self){
-    // if (has.call(self,k)) proto[k] = self[k];
     proto[k] = self[k];
   }
 }
@@ -17,6 +13,8 @@ Resource.entity = function(meth,klass){
 }
 
 Resource.collection = function(meth,klass){
+  var Collection = 
+    (Resource.Collection = Resource.Collection || require('collection'))
   return this.expose(meth, function(arr){
     return new Collection(arr).map(function(obj){ 
       return new klass(obj); 
