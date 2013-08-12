@@ -103,6 +103,21 @@ fixtures.push( {
   }
 } );
 
+fixtures.push( {
+  links: {
+    self: '/post/234',
+    page: '/post{?page,max}',
+    comment: '/post/234/comment/{id}'
+  },
+  post: {
+    title: 'How the Grinch stole Christmas',
+    comments: [
+      { id: 456, body: 'I hated it' },
+      { id: 789, body: 'I loved it' }
+    ]
+  }
+} );
+
 /* ---------------------------- */
 
 describe('Resource', function(){
@@ -151,9 +166,11 @@ describe('Resource', function(){
     assert(spy.calledWith(newComment));
   })
 
+  it('should generate two commands in order')
+
 })
 
-describe('Resource with casting', function(){
+describe('Resource exposures with casting', function(){
   beforeEach(function(){
     this.subject = new CastedPostResource( fixtures[0] );    
   })
@@ -174,5 +191,40 @@ describe('Resource with casting', function(){
       assert(Comment === obj.constructor);
     })
   })
+})
+
+describe('Resource command generation with URI template', function(){
+  beforeEach(function(){
+    this.subject = new PostResource( fixtures[1] );
+  })
+
+  it('list should resolve URI template with passed params', function(){
+    var subject = this.subject;
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.get = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.list('page', {page: 9, max: 999}, function(){});
+    subject.commit();
+
+    assert(spy.calledOnce());
+    assert('/post?page=9&max=999' == dummy.address);
+  })
+
+  it('remove should resolve URI template with passed params', function(){
+    var subject = this.subject;
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.del = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.remove('comment', {id: 456});
+    subject.commit();
+
+    assert(spy.calledOnce());
+    assert('/post/234/comment/456' == dummy.address);
+  })
+
 })
 

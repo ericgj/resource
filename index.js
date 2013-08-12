@@ -1,3 +1,5 @@
+var uritemplate = require('uritemplate')
+  , noop = function(){}
 
 module.exports = Resource;
 
@@ -29,33 +31,57 @@ Resource.expose = function(meth, cast){
   return this;
 }
 
-// TODO: implied name = 'self' if arguments.length < 2 ?
 Resource.read =
-Resource.list = function(name,fn){
-  this.addCommand(this.links[name], 'get', fn);
+Resource.list = function(name,params,fn){
+  if (arguments.length == 0) {
+    fn = noop; params = undefined; name = 'self';
+  }
+  if (arguments.length == 1) {
+    fn = name; params = undefined; name = 'self';
+  }
+  if (arguments.length == 2) {
+    fn = params; params = undefined;
+  }
+  var uri = this.links[name]
+  if (params) uri = resolve(uri, params); 
+  this.addCommand(uri, 'get', fn);
   return this;
 }
 
 Resource.add =
-Resource.create = function(name,obj){
-  this.addCommand(this.links[name], 'post', obj);
+Resource.create = function(name,obj,params){
+  var uri = this.links[name]
+  if (params) uri = resolve(uri, params);
+  this.addCommand(uri, 'post', obj);
   return this;
 }
 
-Resource.update = function(name,obj){
-  this.addCommand(this.links[name], 'put', obj);
+Resource.update = function(name,obj,params){
+  var uri = this.links[name]
+  if (params) uri = resolve(uri, params);
+  this.addCommand(uri, 'put', obj);
   return this;
 }
   
-Resource.del = function(name,obj){
-  this.addCommand(this.links[name], 'del', obj);
+Resource.remove =
+Resource.del = function(name,params){
+  if (arguments.length == 0) {
+    name = 'self';
+  }
+  var uri = this.links[name]
+  if (params) uri = resolve(uri,params);
+  this.addCommand(uri, 'del');
   return this;
 }
 
 Resource.addCommand = function(addr,verb,obj){
   var service = this.service;
   this.commands.push( function(cb){
-    service(addr)[verb](obj,cb);
+    if (obj){
+      service(addr)[verb](obj,cb);
+    } else {
+      service(addr)[verb](cb);
+    }
   });
 }
 
@@ -65,3 +91,14 @@ Resource.commit = function(cb){
     cmds.shift()(cb);
   }
 }
+
+// private
+
+var templates = {}   // cache
+
+function resolve(path,data){
+  var t = templates[path] || uritemplate.parse(path);
+  templates[path] = t;
+  return t.expand(data);
+}
+
