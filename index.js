@@ -31,6 +31,16 @@ Resource.expose = function(meth, cast){
   return this;
 }
 
+Resource.resolvedLink = function(name,data){
+  var path = this.links[name]
+  if (data){
+    var t = templates[path] || uritemplate.parse(path);
+    templates[path] = t;
+    path = t.expand(data);
+  }
+  return path;
+}
+
 Resource.read =
 Resource.list = function(name,params,fn){
   if (arguments.length == 0) {
@@ -42,8 +52,7 @@ Resource.list = function(name,params,fn){
   if (arguments.length == 2) {
     fn = params; params = undefined;
   }
-  var uri = this.links[name]
-  if (params) uri = resolve(uri, params); 
+  var uri = this.resolvedLink(name,params);
   this.addCommand(uri, 'get', fn);
   return this;
 }
@@ -53,8 +62,7 @@ Resource.create = function(name,params,obj){
   if (arguments.length == 2) {
     obj = params; params = undefined;
   }
-  var uri = this.links[name]
-  if (params) uri = resolve(uri, params);
+  var uri = this.resolvedLink(name,params);
   this.addCommand(uri, 'post', obj);
   return this;
 }
@@ -63,8 +71,7 @@ Resource.update = function(name,params,obj){
   if (arguments.length == 2) {
     obj = params; params = undefined;
   }
-  var uri = this.links[name]
-  if (params) uri = resolve(uri, params);
+  var uri = this.resolvedLink(name,params);
   this.addCommand(uri, 'put', obj);
   return this;
 }
@@ -74,8 +81,7 @@ Resource.del = function(name,params){
   if (arguments.length == 0) {
     name = 'self';
   }
-  var uri = this.links[name]
-  if (params) uri = resolve(uri,params);
+  var uri = this.resolvedLink(name,params);
   this.addCommand(uri, 'del');
   return this;
 }
@@ -100,11 +106,6 @@ Resource.commit = function(cb){
 
 // private
 
-var templates = {}   // cache
+var templates = {}   // cache URI templates across all resources
 
-function resolve(path,data){
-  var t = templates[path] || uritemplate.parse(path);
-  templates[path] = t;
-  return t.expand(data);
-}
 
