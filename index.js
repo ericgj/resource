@@ -53,7 +53,7 @@ Resource.list = function(name,params,fn){
     fn = params; params = undefined;
   }
   var uri = this.resolvedLink(name,params);
-  this.addCommand(uri, 'get', fn);
+  this.callService(uri, 'get', fn);
   return this;
 }
 
@@ -63,7 +63,7 @@ Resource.create = function(name,params,obj){
     obj = params; params = undefined;
   }
   var uri = this.resolvedLink(name,params);
-  this.addCommand(uri, 'post', obj);
+  this.callService(uri, 'post', obj);
   return this;
 }
 
@@ -72,7 +72,7 @@ Resource.update = function(name,params,obj){
     obj = params; params = undefined;
   }
   var uri = this.resolvedLink(name,params);
-  this.addCommand(uri, 'put', obj);
+  this.callService(uri, 'put', obj);
   return this;
 }
   
@@ -82,25 +82,18 @@ Resource.del = function(name,params){
     name = 'self';
   }
   var uri = this.resolvedLink(name,params);
-  this.addCommand(uri, 'del');
+  this.callService(uri, 'del');
   return this;
 }
 
-Resource.addCommand = function(addr,verb,obj){
-  var service = this.service;
-  this.commands.push( function(cb){
-    if (obj){
-      service(addr)[verb](obj,cb);
-    } else {
-      service(addr)[verb](cb);
-    }
-  });
-}
-
-Resource.commit = function(cb){
-  var cmds = this.commands;
-  while (cmds.length){
-    cmds.shift()(cb);
+// TODO: error-handling callback defined in target class
+Resource.callService = function(addr,verb,obj){
+  var service = this.service
+    , cb
+  if (obj){
+    service(addr)[verb](obj,cb);
+  } else {
+    service(addr)[verb](cb);
   }
 }
 

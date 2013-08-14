@@ -142,7 +142,6 @@ describe('Resource', function(){
     subject.setService(dummy);
 
     subject.update('author', newAuthor);
-    subject.commit();
     
     assert(subject.links.author == dummy.address);
     assert(spy.calledOnce());
@@ -159,14 +158,11 @@ describe('Resource', function(){
     subject.setService(dummy);
 
     subject.add('comments', newComment);
-    subject.commit();
 
     assert(subject.links.comments == dummy.address);
     assert(spy.calledOnce());
     assert(spy.calledWith(newComment));
   })
-
-  it('should generate two commands in order')
 
 })
 
@@ -206,7 +202,6 @@ describe('Resource command generation with URI template', function(){
     subject.setService(dummy);
 
     subject.list('page', {page: 9, max: 999}, function(){});
-    subject.commit();
 
     assert(spy.calledOnce());
     assert('/post?page=9&max=999' == dummy.address);
@@ -220,7 +215,6 @@ describe('Resource command generation with URI template', function(){
     subject.setService(dummy);
 
     subject.remove('comment', {id: 456});
-    subject.commit();
 
     assert(spy.calledOnce());
     assert('/post/234/comment/456' == dummy.address);
@@ -235,7 +229,6 @@ describe('Resource command generation with URI template', function(){
     subject.setService(dummy);
 
     subject.update('comment', {id: 456}, updComment);
-    subject.commit();
 
     assert(spy.calledOnce());
     assert('/post/234/comment/456' == dummy.address);
