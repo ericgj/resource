@@ -42,16 +42,12 @@ Resource.resolvedLink = function(name,data){
 }
 
 Resource.read =
-Resource.list = function(name,params,fn){
-  if (arguments.length == 0) {
-    fn = noop; params = undefined; name = 'self';
-  }
-  if (arguments.length == 1) {
-    fn = name; params = undefined; name = 'self';
-  }
-  if (arguments.length == 2) {
-    fn = params; params = undefined;
-  }
+Resource.list = function(name){
+  var args = [].slice.call(arguments,1)
+    , last = args.slice(-1)[0]
+    , fn = ('function' == typeof last ? args.pop() : refresh.bind(this))
+    , params = {}
+  for (var i=0;i<args.length;++i) merge(params,args[i]);
   var uri = this.resolvedLink(name,params);
   this.callService(uri, 'get', fn);
   return this;
@@ -89,7 +85,7 @@ Resource.del = function(name,params){
 // TODO: error-handling callback defined in target class
 Resource.callService = function(addr,verb,obj){
   var service = this.service
-    , cb
+    , cb  // placeholder
   if (obj){
     service(addr)[verb](obj,cb);
   } else {
@@ -97,7 +93,22 @@ Resource.callService = function(addr,verb,obj){
   }
 }
 
+/* 
+ * Default read callback == reparse message and optionally emit 'refresh'
+ * Note that parse() must be defined in target class
+ *
+ */
+function refresh(res){
+  this.parse(res);
+  if (this.emit) this.emit('refresh');
+}
+
 // private
+
+function merge(obj,from){
+  for (var k in from) obj[k] = from[k];
+  return obj;
+}
 
 var templates = {}   // cache URI templates across all resources
 

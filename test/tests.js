@@ -17,7 +17,7 @@ function PostResource(message, service){
   this.expose('post');
   this.expose('author');
   this.expose('comments');
-  parse(message, this);
+  this.parse(message);
   return this;
 }
 
@@ -30,7 +30,7 @@ function CastedPostResource(message, service){
   this.entity('post', Post);
   this.expose('author', function(obj){ return obj.id; });
   this.collection('comments', Comment);
-  parse(message, this);
+  this.parse(message);
   return this;
 }
 
@@ -43,14 +43,15 @@ PostResource.prototype.setService = function(service){
   return this;
 }
 
-function parse(message, resource){
+PostResource.prototype.parse = 
+CastedPostResource.prototype.parse = function(message){
   if (message.links) {
-    for (var link in message.links) resource.links[link] = message.links[link];
+    for (var link in message.links) this.links[link] = message.links[link];
   }
   
-  resource.entities.post = {};
-  resource.entities.comments = [];
-  resource.entities.author = {};
+  this.entities.post = {};
+  this.entities.comments = [];
+  this.entities.author = {};
   
   if (message.post) {
     var post = message.post;
@@ -58,16 +59,16 @@ function parse(message, resource){
       switch(prop){
         case 'comments':
           for (var i=0;i<post.comments.length;++i){
-            resource.entities.comments.push(post.comments[i]);
+            this.entities.comments.push(post.comments[i]);
           }
           break;
         case 'author':
           for (var p in post.author){
-            resource.entities.author[p] = post.author[p];
+            this.entities.author[p] = post.author[p];
           }
           break;
         default:
-          resource.entities.post[prop] = post[prop];
+          this.entities.post[prop] = post[prop];
       }
     }
   }  
@@ -106,7 +107,7 @@ fixtures.push( {
 fixtures.push( {
   links: {
     self: '/post/234',
-    page: '/post{?page,max}',
+    page: '/post{?page,max,sort}',
     comment: '/post/234/comment/{id}'
   },
   post: {
@@ -205,6 +206,19 @@ describe('Resource command generation with URI template', function(){
 
     assert(spy.calledOnce());
     assert('/post?page=9&max=999' == dummy.address);
+  })
+
+  it('list should resolve URI template with multiple passed params', function(){
+    var subject = this.subject;
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.get = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.list('page', {page: 9, sort: 'title'}, {max: 999}, {sort: 'id'});
+
+    assert(spy.calledOnce());
+    assert('/post?page=9&max=999&sort=id' == dummy.address);
   })
 
   it('remove should resolve URI template with passed params', function(){
