@@ -226,5 +226,20 @@ describe('Resource command generation with URI template', function(){
     assert('/post/234/comment/456' == dummy.address);
   })
 
+  it('update should resolve URI template with passed params', function(){
+    var subject = this.subject
+      , updComment = {id: 456, body: 'it could have been better'};
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.put = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.update('comment', {id: 456}, updComment);
+    subject.commit();
+
+    assert(spy.calledOnce());
+    assert('/post/234/comment/456' == dummy.address);
+  })
+
 })
 

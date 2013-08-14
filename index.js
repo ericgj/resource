@@ -49,14 +49,20 @@ Resource.list = function(name,params,fn){
 }
 
 Resource.add =
-Resource.create = function(name,obj,params){
+Resource.create = function(name,params,obj){
+  if (arguments.length == 2) {
+    obj = params; params = undefined;
+  }
   var uri = this.links[name]
   if (params) uri = resolve(uri, params);
   this.addCommand(uri, 'post', obj);
   return this;
 }
 
-Resource.update = function(name,obj,params){
+Resource.update = function(name,params,obj){
+  if (arguments.length == 2) {
+    obj = params; params = undefined;
+  }
   var uri = this.links[name]
   if (params) uri = resolve(uri, params);
   this.addCommand(uri, 'put', obj);
