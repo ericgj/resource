@@ -31,12 +31,15 @@ Resource.expose = function(meth, cast){
   return this;
 }
 
-Resource.resolvedLink = function(name,data){
+Resource.resolvedLink = function(name){
   var path = this.links[name]
-  if (data){
+  if (arguments.length > 1){
+    var args = [].slice.call(arguments,1)
+      , params = {}
+    for (var i=0;i<args.length;++i) merge(params,args[i]);
     var t = templates[path] || uritemplate.parse(path);
     templates[path] = t;
-    path = t.expand(data);
+    path = t.expand(params);
   }
   return path;
 }
@@ -46,9 +49,7 @@ Resource.list = function(name){
   var args = [].slice.call(arguments,1)
     , last = args.slice(-1)[0]
     , fn = ('function' == typeof last ? args.pop() : refresh.bind(this))
-    , params = {}
-  for (var i=0;i<args.length;++i) merge(params,args[i]);
-  var uri = this.resolvedLink(name,params);
+  var uri = this.resolvedLink.apply(this,[name].concat(args));
   this.callService(uri, 'get', fn);
   return this;
 }
@@ -57,9 +58,7 @@ Resource.readOptions = function(name){
   var args = [].slice.call(arguments,1)
     , last = args.slice(-1)[0]
     , fn = ('function' == typeof last ? args.pop() : refresh.bind(this))
-    , params = {}
-  for (var i=0;i<args.length;++i) merge(params,args[i]);
-  var uri = this.resolvedLink(name,params);
+  var uri = this.resolvedLink.apply(this,[name].concat(args));
   this.callService(uri, 'options', fn);
   return this;
 }
