@@ -3,16 +3,28 @@ var request = require('superagent')
 
 module.exports = Service;
 
-function Service(addr){
-  if (!(this instanceof Service)) return new Service(addr);
+function Service(addr,opts){
+  if (!(this instanceof Service)) return new Service(addr,opts);
   this.target = addr;
-  request.type('application/json');
+  this.opts = opts || {};
   return this;
 }
 
 Service.prototype.get = function(parse,handle){
-  request.get(this.target)
-         .end( 
+  var req = request.get(this.target)
+  applyOptions.call(this,req);
+  req.end( 
+    function(res){
+      handle(res);
+      parse(res);
+    }
+  );
+}
+
+Service.prototype.options = function(parse,handle){
+  var req = request.options(this.target)
+  applyOptions.call(this,req);
+  req.end( 
     function(res){
       handle(res);
       parse(res);
@@ -21,18 +33,47 @@ Service.prototype.get = function(parse,handle){
 }
 
 Service.prototype.post = function(obj,handle){
-  request.post(this.target)
-         .send(obj)
-         .end(handle);
+  var req = request.post(this.target)
+  applyOptions.call(this,req);
+  req.send(obj)
+     .end(handle);
 }
 
 Service.prototype.put = function(obj,handle){
-  request.put(this.target)
-         .send(obj)
-         .end(handle)
+  var req = request.put(this.target)
+  applyOptions.call(this,req);
+  req.send(obj)
+     .end(handle);
 }
 
 Service.prototype.del = function(handle){
-  request.del(this.target).end(handle);
+  var req = req.del(this.target)
+  applyOptions.call(this,req);
+  req.end(handle);
 }
 
+
+// private
+
+function applyOptions(req){
+  var opts = {}
+  merge(opts, defaultOptions[req.method]);
+  merge(opts, this.opts['*'] || {});
+  merge(opts, this.opts[req.method] || {});
+  for (var meth in opts) req[meth](opts[meth]);
+  return req;
+}
+
+var defaultOptions = {
+  'GET':     { type: 'application/json' },
+  'OPTIONS': { type: 'application/json' },
+  'POST':    { type: 'application/json' },
+  'PUT':     { type: 'application/json' },
+  'DELETE':  { }
+}
+
+
+function merge(obj,from){
+  for (var k in from) obj[k] = from[k];
+  return obj;
+}

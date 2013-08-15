@@ -132,8 +132,21 @@ describe('Resource', function(){
     assert('Karl Marx' ==  subject.author().name);
     assert(1 == subject.comments().length);
   })
- 
-  it('should generate command to update singular entity', function(){
+
+  it('should run command to get options', function(){
+    var subject = this.subject
+    var spy = new Spy()
+    function dummy(address){ dummy.address = address; return dummy; }
+    dummy.options = spy.watch.bind(spy);
+    subject.setService(dummy);
+
+    subject.readOptions('self');
+    
+    assert(subject.links.self == dummy.address);
+    assert(spy.calledOnce());
+  })
+
+  it('should run command to update singular entity', function(){
     var subject = this.subject
       , newAuthor = { id: '/user/456', name: 'Jules Verne' }
     assert(this.subject.links.author);
@@ -149,7 +162,7 @@ describe('Resource', function(){
     assert(spy.calledWith(newAuthor));
   })
 
-  it('should generate command to add to a collection', function(){
+  it('should run command to add to a collection', function(){
     var subject = this.subject
       , newComment = { id: '/comment/456', body: 'despite the rain' };
     assert(this.subject.links.comments);
@@ -190,7 +203,7 @@ describe('Resource exposures with casting', function(){
   })
 })
 
-describe('Resource command generation with URI template', function(){
+describe('Resource commands with URI templating', function(){
   beforeEach(function(){
     this.subject = new PostResource( fixtures[1] );
   })
