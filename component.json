@@ -2,7 +2,7 @@
   "name": "resource",
   "repo": "ericgj/resource",
   "description": "Server-facing models",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "keywords": [],
   "dependencies": {
     "ericgj/uritemplate": "*",

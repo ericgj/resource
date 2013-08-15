@@ -1,5 +1,4 @@
 var uritemplate = require('uritemplate')
-  , noop = function(){}
 
 module.exports = Resource;
 
@@ -44,8 +43,7 @@ Resource.resolvedLink = function(name){
   return path;
 }
 
-Resource.read =
-Resource.list = function(name){
+Resource.read = function(name){
   var args = [].slice.call(arguments,1)
     , last = args.slice(-1)[0]
     , fn = ('function' == typeof last ? args.pop() : refresh.bind(this))

@@ -208,27 +208,27 @@ describe('Resource commands with URI templating', function(){
     this.subject = new PostResource( fixtures[1] );
   })
 
-  it('list should resolve URI template with passed params', function(){
+  it('read should resolve URI template with passed params', function(){
     var subject = this.subject;
     var spy = new Spy()
     function dummy(address){ dummy.address = address; return dummy; }
     dummy.get = spy.watch.bind(spy);
     subject.setService(dummy);
 
-    subject.list('page', {page: 9, max: 999}, function(){});
+    subject.read('page', {page: 9, max: 999}, function(){});
 
     assert(spy.calledOnce());
     assert('/post?page=9&max=999' == dummy.address);
   })
 
-  it('list should resolve URI template with multiple passed params', function(){
+  it('read should resolve URI template with multiple passed params', function(){
     var subject = this.subject;
     var spy = new Spy()
     function dummy(address){ dummy.address = address; return dummy; }
     dummy.get = spy.watch.bind(spy);
     subject.setService(dummy);
 
-    subject.list('page', {page: 9, sort: 'title'}, {max: 999}, {sort: 'id'});
+    subject.read('page', {page: 9, sort: 'title'}, {max: 999}, {sort: 'id'});
 
     assert(spy.calledOnce());
     assert('/post?page=9&max=999&sort=id' == dummy.address);
