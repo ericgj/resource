@@ -69,6 +69,19 @@ Resource(StudentResource.prototype);
 Emitter(StudentResource.prototype);
 
 
+// dumb models
+
+function Student(data){
+  for (var k in data) this[k] = data[k];
+  return this;
+}
+
+function School(data){
+  for (var k in data) this[k] = data[k];
+  return this;
+}
+
+
 describe('Resource', function(){
   beforeEach(function(done){
     request.del('/fixtures').end( function(){
@@ -79,9 +92,10 @@ describe('Resource', function(){
   beforeEach(function(done){
     var test = this;
     var api = new API(http);
-    api.on('refresh', function(){
+    api.once('refresh', function(){
       var subject = new StudentResource(http)
                          .boot(api.resolvedLink('students'), function(){ done(); });
+      subject.collection('students', Student);
       test.subject = subject;
     })
     api.boot('/api');
@@ -99,6 +113,32 @@ describe('Resource', function(){
         assert('object' == typeof students[i].school);
       }
     }
+  })
+
+  it('should read options', function(done){
+    this.subject.readOptions('self', function(res){
+      assert(res.body.accept);
+      done();
+    })
+  })
+
+  it('should add new entity', function(){
+    var student = new Student({name: 'Frank'})
+    student.school = new School({id: 2})
+    this.subject.add('all', student);
+  })
+
+  it('should update existing entity', function(){
+    var student = this.subject.students().find('name == "Eric"');
+    assert(student);
+    student.email = "eric@school.edu";
+    this.subject.update('student',{id: student.id},student);
+  })
+
+  it('should remove existing entity', function(){
+    var student = this.subject.students().find('name == "Eric"');
+    assert(student);
+    this.subject.remove('student',{id: student.id});
   })
 
 })

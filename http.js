@@ -1,3 +1,5 @@
+//TODO: remove superagent dep, just use straight xhr
+//TODO: move this to another repo
 
 var request = require('superagent')
 
@@ -22,7 +24,7 @@ Service.prototype.get = function(parse,handle){
 }
 
 Service.prototype.options = function(parse,handle){
-  var req = request.options(this.target)
+  var req = new request.Request('OPTIONS', this.target)
   applyOptions.call(this,req);
   req.end( 
     function(res){
@@ -47,7 +49,7 @@ Service.prototype.put = function(obj,handle){
 }
 
 Service.prototype.del = function(handle){
-  var req = req.del(this.target)
+  var req = request.del(this.target)
   applyOptions.call(this,req);
   req.end(handle);
 }

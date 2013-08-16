@@ -31,6 +31,12 @@ db.find = function(ent,val){
   });
   return ret;
 }
+db.splice = function(ent,val){
+  var table = db[ent]
+  table.forEach( function(rec){
+    if (rec.id == val) { table.splice(rec); return; }
+  });
+}
 
 // utility routes
 
@@ -82,12 +88,51 @@ app.get('/students', function(req, res){
     links: {
       self: '/students?page='+page+'&max='+max,
       where: '/students{?page,max}',
-      students: '/students',
+      all: '/students',
       student: '/students/{id}',
       studentSchool: '/students/{id}/school'
     },
     students: db.students.slice(page,max+page).map(db.studentWithSchool)
   });
+})
+
+app.post('/students', function(req, res){
+  var student = req.body
+    , school = (student.school ? student.school.id : undefined)
+    , id = db.students.length + 1
+  student.school = school;
+  student.id = id;
+  db.students.push(student);
+  var student = db.find('students', id);
+  res.header('Location', '/student/'+id);
+  res.send({
+    links: {
+      self: '/student/'+id,
+      all: '/students',
+      school: '/students/'+id+'/school'
+    },
+    student: db.studentWithSchool(student)
+  }, 201);
+})
+
+app.put('/students/:id', function(req, res){
+  var student = req.body
+    , school = (student.school ? student.school.id : undefined)
+    , id = req.params.id
+  student.school = school;
+  student.id = id;
+  db.splice('students',id);
+  db.students.push(student);
+  var student = db.find('students', id);
+  res.header('Location', '/student/'+id);
+  res.send(204);  
+})
+
+app.del('/students/:id', function(req, res){
+  var id = req.params.id
+  db.splice('students',id);
+  res.header('Location', '/student/'+id);
+  res.send(204);  
 })
 
 // fixtures
