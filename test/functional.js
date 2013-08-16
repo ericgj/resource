@@ -19,9 +19,10 @@ API.prototype.parse = function(message){
   return this;
 }
 
-API.prototype.setService = function(service,opts){
+API.prototype.setService = function(service,opts,cb){
   this.service = service;
   if (opts) this.serviceOptions = opts;
+  if (cb) this.serviceHandler = cb;
   return this;
 }
 
@@ -96,6 +97,9 @@ describe('Resource', function(){
       var subject = new StudentResource(http)
                          .boot(api.resolvedLink('students'), function(){ done(); });
       subject.collection('students', Student);
+      subject.serviceHandler = function(res){
+        if (res.error) throw new Error('Error response '+res.status);
+      }
       test.subject = subject;
     })
     api.boot('/api');
@@ -139,6 +143,11 @@ describe('Resource', function(){
     var student = this.subject.students().find('name == "Eric"');
     assert(student);
     this.subject.remove('student',{id: student.id});
+  })
+
+  it('should call service handler', function(done){
+    this.subject.serviceHandler = function(){ done(); }
+    this.subject.read('self');
   })
 
 })

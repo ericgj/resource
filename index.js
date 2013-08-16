@@ -90,7 +90,7 @@ Resource.del = function(name,params){
 // Note: service, serviceOptions set in target class
 Resource.callService = function(addr,verb,obj){
   var service = this.service
-    , cb = noop        // placeholder
+    , cb = this.serviceHandler || noop 
     , opts = this.serviceOptions || {}
   if (obj){
     service(addr,opts)[verb](obj,cb);
