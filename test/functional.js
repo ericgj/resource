@@ -12,14 +12,6 @@ function API(service){
   return this;
 }
 
-// TODO move to Resource mixin
-API.prototype.boot = function(addr,fn) { 
-  if (addr) this.links.self = addr; 
-  if (fn) this.on('refresh', fn);
-  this.read('self');
-  return this; 
-}
-
 API.prototype.parse = function(message){
   if (message.links) {
     for (var link in message.links) this.links[link] = message.links[link];
@@ -44,13 +36,6 @@ function StudentResource(service){
   this.links = {};
   this.entities = {};
   return this;
-}
-
-StudentResource.prototype.boot = function(addr,fn) { 
-  if (addr) this.links.self = addr; 
-  if (fn) this.on('refresh', fn);
-  this.read('self');
-  return this; 
 }
 
 // tedious, need xpath/selector style helpers

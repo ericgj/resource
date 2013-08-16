@@ -31,17 +31,12 @@ Resource.expose = function(meth, cast){
   return this;
 }
 
-Resource.resolvedLink = function(name){
-  var path = this.links[name]
-  if (arguments.length > 1){
-    var args = [].slice.call(arguments,1)
-      , params = {}
-    for (var i=0;i<args.length;++i) merge(params,args[i]);
-    var t = templates[path] || uritemplate.parse(path);
-    templates[path] = t;
-    path = t.expand(params);
-  }
-  return path;
+
+Resource.boot = function(addr,fn) { 
+  if (addr) this.links.self = addr; 
+  if (fn) this.on('refresh', fn);
+  this.read('self');
+  return this; 
 }
 
 Resource.read = function(name){
@@ -102,6 +97,19 @@ Resource.callService = function(addr,verb,obj){
   } else {
     service(addr,opts)[verb](cb);
   }
+}
+
+Resource.resolvedLink = function(name){
+  var path = this.links[name]
+  if (arguments.length > 1){
+    var args = [].slice.call(arguments,1)
+      , params = {}
+    for (var i=0;i<args.length;++i) merge(params,args[i]);
+    var t = templates[path] || uritemplate.parse(path);
+    templates[path] = t;
+    path = t.expand(params);
+  }
+  return path;
 }
 
 /* 
