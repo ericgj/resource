@@ -2,19 +2,22 @@
   "name": "resource",
   "repo": "ericgj/resource",
   "description": "Server-facing models",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "keywords": [],
   "dependencies": {
     "ericgj/uritemplate": "*",
-    "component/collection": "*"  
+    "component/collection": "*",
+    "visionmedia/superagent": "*"
   },
   "development": {
     "component/assert": "*",  
+    "component/emitter": "*",
     "ericgj/minispy": "*"
   },
   "license": "MIT",
   "main": "index.js",
   "scripts": [
-    "index.js"
+    "index.js",
+    "http.js"
   ]
 }

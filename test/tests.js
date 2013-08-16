@@ -2,6 +2,7 @@
 var assert = require('component-assert')
   , Spy = require('ericgj-minispy')
   , Resource = require('resource')
+  , http = require('resource/http')
 
 // Set up test models
 

@@ -1,4 +1,5 @@
 var uritemplate = require('uritemplate')
+  , noop = function(){}
 
 module.exports = Resource;
 
@@ -94,7 +95,7 @@ Resource.del = function(name,params){
 // Note: service, serviceOptions set in target class
 Resource.callService = function(addr,verb,obj){
   var service = this.service
-    , cb         // placeholder
+    , cb = noop        // placeholder
     , opts = this.serviceOptions || {}
   if (obj){
     service(addr,opts)[verb](obj,cb);
@@ -109,7 +110,7 @@ Resource.callService = function(addr,verb,obj){
  *
  */
 function refresh(res){
-  this.parse(res);
+  this.parse(res.body);
   if (this.emit) this.emit('refresh');
 }
 
